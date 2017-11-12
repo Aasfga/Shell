@@ -1,6 +1,6 @@
-INC=-I../include
+INC=-I../../include
 CFLAGS=$(INC)
-HDEPS=../include/siparse.h ../include/config.h siparseutils.h
+HDEPS=../../include/siparse.h ../../include/config.h siparseutils.h
 
 INSTALL_DIR=../
 
