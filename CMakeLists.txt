@@ -8,7 +8,7 @@ include_directories(include)
 file(GLOB SOURCE_FILES src/*.c)
 file(GLOB HEADERS include/*.h)
 
-add_executable(Shell ${SOURCE_FILES} ${HEADERS} include/errors.h include/errors.h src/reader.c include/reader.h src/errors.c src/debug.c src/debug.h)
+add_executable(Shell ${SOURCE_FILES} ${HEADERS} src/shl_io.c include/shl_io.h src/shl_execute.c include/shl_execute.h)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     target_link_libraries(Shell ${CMAKE_SOURCE_DIR}/lib/siparse.a)
 else()

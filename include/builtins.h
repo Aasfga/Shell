@@ -10,4 +10,6 @@ typedef struct {
 
 extern builtin_pair builtins_table[];
 
+int my_exit(char **argv);
+
 #endif /* !_BUILTINS_H_ */

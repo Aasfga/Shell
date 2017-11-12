@@ -6,7 +6,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include "reader.h"
+#include <errno.h>
+#include <sys/stat.h>
+#include "shl_io.h"
 
 int find_end(const char *input, int i, int e)
 {
@@ -91,4 +93,42 @@ int shl_read(char *input)
 	}
 
 	return 0;
+}
+
+void exec_error(char *name, int status)
+{
+	write(2, name, strlen(name));
+	write(2, ": ", 2);
+	print_error(status);
+}
+
+void print_error(int status)
+{
+	switch(status)
+	{
+		case ENOENT:
+			write(2, NO_FILE, strlen(NO_FILE));
+			break;
+		case EACCES:
+			write(2, NO_ACCESS, strlen(NO_ACCESS));
+			break;
+		case SYNTAX_ERROR:
+			write(2, SYNTAX_ERROR_STR, strlen(SYNTAX_ERROR_STR));
+			break;
+		default:
+			write(2, EXEC_FAIL, strlen(EXEC_FAIL));
+	}
+	fflush(stderr);
+}
+
+void print_prompt()
+{
+	struct stat b;
+	fstat(0, &b);
+	if(S_ISCHR(b.st_mode))
+	{
+		fflush(stdout);
+		write(1, PROMPT_STR, strlen(PROMPT_STR));
+		fflush(stdout);
+	}
 }

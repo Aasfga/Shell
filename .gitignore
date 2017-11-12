@@ -118,6 +118,6 @@ dkms.conf
 .idea/**
 
 build/**
-Makefile
+/Makefile
 **/Shell
 bin/*
