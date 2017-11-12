@@ -50,6 +50,8 @@ int my_exit(char **argv)
 
 int my_cd(char **argv)
 {
+	if(argv[1] != NULL && argv[2] != NULL)
+		return -1;
 	char *path = argv[1];
 	if(argv[1] == NULL)
 		path = getenv("HOME");
