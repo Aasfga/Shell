@@ -142,7 +142,7 @@ int shl_exec(line *line)
 		if(b >= 0)
 		{
 			if(builtins_table[b].fun(p[0]->argv) != 0)
-				exec_error(builtins_table[b].name, errno);
+				builtin_error(builtins_table[b].name);
 			else
 				return 0;
 		}

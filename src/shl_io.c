@@ -121,6 +121,13 @@ void print_error(int status)
 	fflush(stderr);
 }
 
+void builtin_error(char *name)
+{
+	write(0, "Builtin ", 8);
+	write(0, name, strlen(name));
+	write(0, " error.\n", 8);
+}
+
 void print_prompt()
 {
 	struct stat b;

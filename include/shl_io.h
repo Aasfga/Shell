@@ -10,6 +10,8 @@
 #define EXEC_FAIL "exec error\n"
 #define SYNTAX_ERROR 128
 
+
+
 void print_prompt();
 
 int shl_read(char *input);
@@ -17,5 +19,7 @@ int shl_read(char *input);
 void exec_error(char *name, int status);
 
 void print_error(int status);
+
+void builtin_error(char *name);
 
 #endif //SHELL_READER_H
