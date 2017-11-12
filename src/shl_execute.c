@@ -11,6 +11,8 @@
 #include <builtins.h>
 #include <string.h>
 #include "shl_execute.h"
+#include <sys/wait.h>
+#include <sys/types.h>
 
 int move_descriptor(int fd, int dest)
 {
