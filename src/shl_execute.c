@@ -72,6 +72,24 @@ int set_new_process(command *com)
 	return EXEC_FAILURE;
 }
 
+int shl_exec_command(command *com)
+{
+	if(!fork())
+	{
+		exit(set_new_process(com));
+	}
+
+	int err = 0;
+	wait(&err);
+
+	if(WIFEXITED(err))
+		err = WEXITSTATUS(err);
+	else
+		err = 0;
+
+	return err;
+}
+
 int shl_exec_pipeline(pipeline commands)
 {
 	int id = 0;
@@ -99,29 +117,6 @@ int shl_exec_pipeline(pipeline commands)
 	return 0;
 }
 
-int shl_exec_command(command *com)
-{
-	if(!fork())
-	{
-		//if is builtin
-		//use it
-		//else
-		//osobna funkcja
-		exit(set_new_process(com));
-	}
-
-	int err = 0;
-	wait(&err);
-
-
-	if(WIFEXITED(err))
-		err = WEXITSTATUS(err);
-	else
-		err = 0;
-
-	return err;
-}
-
 int is_builtin(command *com)
 {
 	for(int i = 0; builtins_table[i].fun != NULL; i++)
@@ -146,7 +141,10 @@ int shl_exec(line *line)
 		int b = is_builtin(p[0]);
 		if(b >= 0)
 		{
-			return builtins_table[b].fun(p[0]->argv);
+			if(builtins_table[b].fun(p[0]->argv) != 0)
+				exec_error(builtins_table[b].name, errno);
+			else
+				return 0;
 		}
 		else
 		{

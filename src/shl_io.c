@@ -127,7 +127,6 @@ void print_prompt()
 	fstat(0, &b);
 	if(S_ISCHR(b.st_mode))
 	{
-		fflush(stdout);
 		write(1, PROMPT_STR, strlen(PROMPT_STR));
 		fflush(stdout);
 	}
