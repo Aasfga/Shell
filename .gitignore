@@ -122,3 +122,4 @@ build/**
 **/Shell
 bin/*
 Tests/**
+**.gz
