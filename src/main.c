@@ -10,11 +10,10 @@
 #include "config.h"
 #include "siparse.h"
 #include "utils.h"
+#include "reader.h"
+#include "debug.h"
 
 #define DEBUG 0
-#define FILE "/Users/Dominik/Documents/Programowanie/C/Studia/SO/Shell/Tests/suites/1/input/1.in"
-
-
 
 int move_descriptor(int fd, int dest)
 {
@@ -26,40 +25,8 @@ int move_descriptor(int fd, int dest)
 	return 0;
 }
 
-void print_error(int status)
-{
-	switch(status)
-	{
-		case ENOENT:
-			write(2, NO_FILE, strlen(NO_FILE));
-			break;
-		case EACCES:
-			write(2, NO_ACCESS, strlen(NO_ACCESS));
-			break;
-		default:
-			write(2, EXEC_FAIL, strlen(EXEC_FAIL));
-	}
-
-
-}
-
-void swap_stdin()
-{
-	close(0);
-	int i = open(FILE, O_RDONLY, 0);
-	i += 0;
-}
-
-void exec_error(char *name, int status)
-{
-	write(2, name, strlen(name));
-	write(2, ": ", 2);
-	print_error(status);
-}
-
 void print_prompt()
 {
-
 	struct stat b;
 	fstat(0, &b);
 	if(S_ISCHR(b.st_mode))
@@ -68,91 +35,6 @@ void print_prompt()
 		write(1, PROMPT_STR, strlen(PROMPT_STR));
 		fflush(stdout);
 	}
-}
-
-int find_end(const char *input, int i, int e)
-{
-	for(;i < e; i++)
-	{
-		if(input[i] == '\0' || input[i] == '\n')
-			return i;
-	}
-	return -1;
-}
-
-int shl_read(char *input)
-{
-	static char buffer[BUFFER_SIZE];
-	static int index = 0;
-	static int start = 0;
-	int end = find_end(buffer, start, index);
-	int begin;
-	int eof = 0;
-
-
-	while(end == -1 && !eof)
-	{
-		ssize_t bytes = read(0, buffer + index, MAX_LINE_LENGTH);
-		begin = index;
-		index += bytes;
-
-		eof = bytes == 0;
-
-		if(index > 2 * MAX_LINE_LENGTH)
-		{
-			memmove(buffer, buffer + MAX_LINE_LENGTH, index - MAX_LINE_LENGTH);//poprawić zgodnie z pomysłem
-			index -= MAX_LINE_LENGTH;
-			start -= MAX_LINE_LENGTH;
-			begin -= MAX_LINE_LENGTH;
-		}
-
-		end = find_end(buffer, begin, index);//ls ls
-	}
-
-	if(eof)
-	{
-		if(index - start > MAX_LINE_LENGTH)
-		{
-			start = index;
-			return -1;
-		}
-		if(index - start > 0)
-		{
-			memcpy(input, buffer + start, end - start);
-			input[index - start] = '\n';
-			input[index - start + 1] = '\0';
-			start = index;
-		}
-		else
-		{
-			input[0] = 0;
-		}
-	}
-	else
-	{
-		if(end - start > MAX_LINE_LENGTH)
-		{
-			start = end + 1;
-			return -1;
-		}
-		else if(end == start)
-		{
-			input[0] = '\n';
-			input[1] = '\0';
-			start++;
-		}
-		else
-		{
-			memcpy(input, buffer + start, end - start);
-			input[end - start] = '\n';
-			input[end - start + 1] = '\0';
-
-			start = end + 1;
-		}
-
-	}
-
-	return 0;
 }
 
 int set_redirections(redirection **redirs)
@@ -259,12 +141,6 @@ int shl_exec_command(command *com)
 	return err;
 }
 
-void print_syntax_error()
-{
-	write(2, SYNTAX_ERROR_STR, strlen(SYNTAX_ERROR_STR));
-	write(2, "\n", 1);
-}
-
 int shl_parseline(char *i, line **l)
 {
 	*l = parseline(i);
@@ -291,7 +167,7 @@ int main(int argc, char *argv[])
 		status = shl_read(input);
 		if(status == -1)
 		{
-			print_syntax_error();
+			print_error(128);
 			continue;
 		}
 		else if(!input[0])

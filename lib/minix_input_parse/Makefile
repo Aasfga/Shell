@@ -7,14 +7,14 @@ INSTALL_DIR=../
 CSRC=siparseutils.c
 
 all: siparseutils.o y.tab.o lex.yy.o
-	ar rcs $(INSTALL_DIR)siparse.a siparseutils.o lex.yy.o y.tab.o
+	ar rcs $(INSTALL_DIR)siparseM.a siparseutils.o lex.yy.o y.tab.o
 
 lex.yy.o: siparse.lex y.tab.o $(HDEPS)
 	lex  siparse.lex
 	cc $(CFLAGS) lex.yy.c -c 
 
 y.tab.o: siparse.y  $(HDEPS)
-	byacc -d siparse.y
+	yacc -d siparse.y
 	cc $(CFLAGS) y.tab.c -c 
 
 siparseutils.o: siparseutils.c $(HDEPS)

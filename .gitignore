@@ -79,7 +79,7 @@ fabric.properties
 
 # Libraries
 *.lib
-*.a
+lib/*.a
 *.la
 *.lo
 
@@ -114,6 +114,5 @@ dkms.conf
 
 #MACOS
 .DS_STORE
-
 
 .idea/**

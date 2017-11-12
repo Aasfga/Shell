@@ -5,4 +5,6 @@
 #ifndef SHELL_READER_H
 #define SHELL_READER_H
 
+int shl_read(char *input);
+
 #endif //SHELL_READER_H
