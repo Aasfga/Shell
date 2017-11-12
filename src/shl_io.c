@@ -123,9 +123,9 @@ void print_error(int status)
 
 void builtin_error(char *name)
 {
-	write(0, "Builtin ", 8);
-	write(0, name, strlen(name));
-	write(0, " error.\n", 8);
+	write(2, "Builtin ", 8);
+	write(2, name, strlen(name));
+	write(2, " error.\n", 8);
 }
 
 void print_prompt()

@@ -114,8 +114,8 @@ int my_ls(char **argv)
 				continue;
 			else
 			{
-				write(0, ep->d_name, strlen(ep->d_name));
-				write(0, "\n", 1);
+				write(1, ep->d_name, strlen(ep->d_name));
+				write(1, "\n", 1);
 			}
 		}
 
