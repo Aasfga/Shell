@@ -61,8 +61,17 @@ int my_cd(char **argv)
 	return chdir(path);
 }
 
+int read_int(char *num,int *x)
+{
+	char last_char;
+	*x = (int) strtol(num, &last_char, 10);
+}
+
 int my_kill(char **argv)
 {
+	if(argv[1] == NULL)
+		return -1;
+
 	int pid;
 	int sig;
 	if(argv[2] == NULL)
@@ -80,11 +89,14 @@ int my_kill(char **argv)
 
 int my_ls(char **argv)
 {
+
 	char path[1024] = {0};
 	if(argv[1] == NULL)
 	{
 		argv[1] = ".";
 	}
+	else if(argv[2] != NULL)
+		return -1;
 	else if(argv[1][0] == '~')
 	{
 		char *home = getenv("HOME");
