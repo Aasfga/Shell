@@ -141,6 +141,8 @@ int shl_exec(line *line)
 	{
 		p = line->pipelines[i];
 
+		if(p[0]->argv[0] == NULL)
+			continue;
 		int b = is_builtin(p[0]);
 		if(b >= 0)
 		{
