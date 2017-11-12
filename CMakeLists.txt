@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 3.5.1)
+project(Shell)
+
+set(CMAKE_C_STANDARD 99)
+
+include_directories(include)
+file(GLOB SOURCE_FILES src/*.c)
+file(GLOB HEADERS include/*.h)
+
+add_executable(Shell ${SOURCE_FILES} ${HEADERS} include/errors.h include/errors.h)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/..)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    target_link_libraries(Shell ${CMAKE_SOURCE_DIR}/lib/siparseM.a)
+
+else()
+    target_link_libraries(Shell ${CMAKE_SOURCE_DIR}/lib/siparse.a)
+endif()
+
