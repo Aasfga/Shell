@@ -116,3 +116,5 @@ dkms.conf
 .DS_STORE
 
 .idea/**
+
+build/**
