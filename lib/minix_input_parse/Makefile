@@ -1,13 +1,13 @@
-INC=-I../include
+INC=-I../../include
 CFLAGS=$(INC)
-HDEPS=../include/siparse.h ../include/config.h siparseutils.h
+HDEPS=../../include/siparse.h ../../include/config.h siparseutils.h
 
 INSTALL_DIR=../
 
 CSRC=siparseutils.c
 
 all: siparseutils.o y.tab.o lex.yy.o
-	ar rcs $(INSTALL_DIR)siparseM.a siparseutils.o lex.yy.o y.tab.o
+	ar rcs $(INSTALL_DIR)siparse.a siparseutils.o lex.yy.o y.tab.o
 
 lex.yy.o: siparse.lex y.tab.o $(HDEPS)
 	lex  siparse.lex
