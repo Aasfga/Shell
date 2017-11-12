@@ -61,17 +61,11 @@ int my_cd(char **argv)
 	return chdir(path);
 }
 
-int read_int(char *num,int *x)
-{
-	char last_char;
-	*x = (int) strtol(num, &last_char, 10);
-}
-
 int my_kill(char **argv)
 {
 	if(argv[1] == NULL)
 		return -1;
-	else if(argv[2] != NULL)
+	if(argv[2] != NULL && argv[3] != NULL)
 		return -1;
 
 	int pid;
