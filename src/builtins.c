@@ -71,6 +71,8 @@ int my_kill(char **argv)
 {
 	if(argv[1] == NULL)
 		return -1;
+	else if(argv[2] != NULL)
+		return -1;
 
 	int pid;
 	int sig;
