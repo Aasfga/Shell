@@ -61,6 +61,7 @@ int my_cd(char **argv)
 	return chdir(path);
 }
 
+
 int my_kill(char **argv)
 {
 	if(argv[1] == NULL)
@@ -89,7 +90,7 @@ int my_ls(char **argv)
 	char path[1024] = {0};
 	if(argv[1] == NULL)
 	{
-		argv[1] = ".";
+		memcpy(path, getenv("HOME"), strlen(getenv("HOME")));
 	}
 	else if(argv[2] != NULL)
 		return -1;
