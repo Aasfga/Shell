@@ -60,7 +60,10 @@ int my_cd(char **argv)
 		chdir(getenv("HOME"));
 		path += 2;
 	}
-	return chdir(path);
+
+	if(path[0] != '\0')
+		return chdir(path);
+	return 0;
 }
 
 

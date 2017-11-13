@@ -68,7 +68,7 @@ int set_redirs(redirection **redirs)
 int set_new_process(command *com)
 {
 //	write(1, com->argv[0], strlen(com->argv[0]));
-	set_redirs(com->redirs);
+	//set_redirs(com->redirs);
 	execvp(com->argv[0], com->argv);
 	int err = errno;
 	exec_error(com ->argv[0], err);
@@ -103,8 +103,8 @@ int shl_exec_pipeline(pipeline commands)
 		//zamykanie pipa jezeli nie stdin
 		if(commands[i + 1] == NULL)
 		{
-			fd[0] = 1;
-			fd[1] = -1;
+			fd[0] = -1;
+			fd[1] = 1;
 		}
 		else if(pipe(fd) < 0)
 			return -1;
@@ -113,18 +113,19 @@ int shl_exec_pipeline(pipeline commands)
 		{
 			if(move_descriptor(last, 0) < 0)
 				exit(-1);
-			if(move_descriptor(fd[0], 1) < 0)
+			if(move_descriptor(fd[1], 1) < 0)
 				exit(-1);
-			write(1, commands[i]->argv[0], strlen(commands[i]->argv[0]));
-			if(fd[1] >= 0)
-				close(fd[1]);
+
+			if(fd[0] > 0)
+				close(fd[0]);
+
 			set_new_process(commands[i]);
 		}
-		if(last != 0)
+		if(last > 1)
 			close(last);
-		if(fd[0] > 1)
-			close(fd[0]);
-		last = fd[1];
+		last = fd[0];
+		if(fd[1] > 1)
+			close(fd[1]);
 	}
 
 	while(i > 0)
