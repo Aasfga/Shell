@@ -12,7 +12,7 @@
 //ma robić pipeline (jest więcej komand niz jedna)
 
 #define FILE "/Users/Dominik/Documents/Programowanie/C/Studia/SO/Shell/suites/1/input/6.in"
-
+#define DEBUG 0
 
 void swap_stdin()
 {
@@ -38,7 +38,7 @@ int shl_parseline(char *i, line **l)
 
 int main(int argc, char *argv[])
 {
-	if(getenv("DEBUG")[0] == '1')
+	if(DEBUG)
 		swap_stdin();
 
 	char input[MAX_LINE_LENGTH + 1];
