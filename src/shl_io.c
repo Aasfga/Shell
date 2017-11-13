@@ -100,6 +100,7 @@ void exec_error(char *name, int status)
 	write(2, name, strlen(name));
 	write(2, ": ", 2);
 	print_error(status);
+	fflush(stderr);
 }
 
 void print_error(int status)
@@ -126,6 +127,7 @@ void builtin_error(char *name)
 	write(2, "Builtin ", 8);
 	write(2, name, strlen(name));
 	write(2, " error.\n", 8);
+	fflush(stderr);
 }
 
 void print_prompt()

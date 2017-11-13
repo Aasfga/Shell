@@ -167,7 +167,7 @@ int shl_exec(line *line)
 		}
 		else
 		{
-			return shl_exec_pipeline(p);
+			return shl_exec_command(p[0]);//shl_exec_pipeline(p);
 		}
 
 	}
