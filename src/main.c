@@ -49,7 +49,10 @@ int main(int argc, char *argv[])
 			continue;
 
 		if(shl_exec(l) < 0)
-			continue;
+		{
+			printf("EXEC_ERROR!\n");
+			break;
+		}
 	}
 
 

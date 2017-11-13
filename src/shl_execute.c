@@ -13,59 +13,62 @@
 #include "shl_execute.h"
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <stdarg.h>
 
 int move_descriptor(int fd, int dest)
 {
-	int status = close(dest);
-	if(status != 0)
+	if(fd == dest)
+		return 0;
+	if(close(dest) < 0)
 		return -1;
 	dup(fd);
 	close(fd);
 	return 0;
 }
-int set_redirections(redirection **redirs)
+
+//variadic
+int set_redir(int dest_fd, char *filename, int flags, ...)
 {
-	for(int i = 0; ; i++)
+	va_list list;
+	va_start(list, 1);
+	int fd = open(filename, flags, va_arg(list, int));
+	if(fd < 0)
+		return -1;
+	return move_descriptor(fd, dest_fd);
+}
+
+int set_redirs(redirection **redirs)
+{
+	int fd;
+	int status;
+	for(int i = 0; redirs[i] != NULL; i++)
 	{
-		if(redirs[i] == NULL)
-			break;
-		int fd;
-		int status;
 		if(IS_RIN(redirs[i]->flags))
 		{
-			fd = open(redirs[i]->filename, O_RDONLY);
-			if(fd < 0)
+			if(set_redir(0, redirs[i]->filename, O_RDONLY) < 0)
 				return -1;
-			status = move_descriptor(fd, 0);
-			if(status < 0)
-				return status;
 		}
 		else if(IS_ROUT(redirs[i]->flags))
 		{
-			fd = open(redirs[i]->filename, O_TRUNC | O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
-			if(fd < 0)
+			if(set_redir(1, redirs[i]->filename, O_TRUNC | O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR) < 0)
 				return -1;
-			status = move_descriptor(fd, 1);
-			if(status < 0)
-				return status;
+
 		}
 		else
 		{
-			fd = open(redirs[i]->filename, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
-			if(fd < 0)
+			if(set_redir(1, redirs[i]->filename, O_APPEND | O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR) < 0)
 				return -1;
-			status = move_descriptor(fd, 1);
-			if(status < 0)
-				return status;
 		}
 
 	}
 	return 0;
 }
 
+
 int set_new_process(command *com)
 {
-	set_redirections(com->redirs);
+//	write(1, com->argv[0], strlen(com->argv[0]));
+	set_redirs(com->redirs);
 	execvp(com->argv[0], com->argv);
 	int err = errno;
 	exec_error(com ->argv[0], err);
@@ -92,28 +95,43 @@ int shl_exec_command(command *com)
 
 int shl_exec_pipeline(pipeline commands)
 {
-	int id = 0;
+	int last = 0;
 	int fd[2];
-
-	for(int i = 0; commands[i] != NULL; i++)
+	int i;
+	for(i = 0; commands[i] != NULL; i++)
 	{
-		int status = pipe(fd);
 		//zamykanie pipa jezeli nie stdin
-		if(status < 0)
+		if(commands[i + 1] == NULL)
+		{
+			fd[0] = 1;
+			fd[1] = -1;
+		}
+		else if(pipe(fd) < 0)
 			return -1;
+
 		if(!fork())
 		{
-			status = move_descriptor(id, 0);
-			status = move_descriptor(fd[0], 1);
-			if(status < 0)
-				return -1;
-			close(fd[1]);
-
-
+			if(move_descriptor(last, 0) < 0)
+				exit(-1);
+			if(move_descriptor(fd[0], 1) < 0)
+				exit(-1);
+			write(1, commands[i]->argv[0], strlen(commands[i]->argv[0]));
+			if(fd[1] >= 0)
+				close(fd[1]);
 			set_new_process(commands[i]);
 		}
+		if(last != 0)
+			close(last);
+		if(fd[0] > 1)
+			close(fd[0]);
+		last = fd[1];
 	}
 
+	while(i > 0)
+	{
+		wait(NULL);
+		i--;
+	}
 	return 0;
 }
 
@@ -148,7 +166,7 @@ int shl_exec(line *line)
 		}
 		else
 		{
-			return shl_exec_command(p[0]);
+			return shl_exec_pipeline(p);
 		}
 
 	}

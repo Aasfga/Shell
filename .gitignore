@@ -123,3 +123,4 @@ build/**
 bin/*
 Tests/**
 **.gz
+*CMakeCache
