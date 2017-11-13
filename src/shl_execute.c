@@ -26,7 +26,6 @@ int move_descriptor(int fd, int dest)
 	return 0;
 }
 
-//variadic
 int set_redir(int dest_fd, char *filename, int flags, ...)
 {
 	va_list list;
@@ -167,7 +166,7 @@ int shl_exec(line *line)
 		}
 		else
 		{
-			return shl_exec_command(p[0]);//shl_exec_pipeline(p);
+			return shl_exec_pipeline(p);
 		}
 
 	}
