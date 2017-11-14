@@ -95,7 +95,9 @@ int my_ls(char **argv)
 	char path[1024] = {0};
 	if(argv[1] == NULL)
 	{
-		memcpy(path, getenv("PWD"), strlen(getenv("PWD")));
+		if(getcwd(path, 1024) == NULL)
+			return -1;
+//		memcpy(path, getenv("PWD"), strlen(getenv("PWD")));
 	}
 	else if(argv[2] != NULL)
 		return -1;
