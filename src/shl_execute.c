@@ -15,6 +15,7 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <stdarg.h>
+#include <printf.h>
 
 //int move_descriptor(int fd, int dest)
 //{
