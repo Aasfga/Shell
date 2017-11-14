@@ -15,13 +15,23 @@
 #include <sys/types.h>
 #include <stdarg.h>
 
+//int move_descriptor(int fd, int dest)
+//{
+//	if(fd == dest)
+//		return 0;
+//	if(close(dest) < 0)
+//		return -1;
+//	dup(fd);
+//	close(fd);
+//	return 0;
+//}
+
 int move_descriptor(int fd, int dest)
 {
 	if(fd == dest)
 		return 0;
-	if(close(dest) < 0)
+	if(dup2(fd, dest))
 		return -1;
-	dup(fd);
 	close(fd);
 	return 0;
 }
@@ -71,7 +81,7 @@ int set_new_process(command *com)
 	execvp(com->argv[0], com->argv);
 	int err = errno;
 	exec_error(com ->argv[0], err);
-	return EXEC_FAILURE;
+	exit(EXEC_FAILURE);
 }
 
 int shl_exec_command(command *com)
@@ -166,7 +176,8 @@ int shl_exec(line *line)
 		}
 		else
 		{
-			return shl_exec_pipeline(p);
+			if(shl_exec_pipeline(p) < 0)
+				return -1;
 		}
 
 	}

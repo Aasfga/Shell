@@ -12,7 +12,7 @@
 //ma robić pipeline (jest więcej komand niz jedna)
 
 #define FILE "/Users/Dominik/Documents/Programowanie/C/Studia/SO/Shell/suites/1/input/6.in"
-#define DEBUG 0
+#define DEBUG 1
 
 void swap_stdin()
 {
@@ -20,11 +20,6 @@ void swap_stdin()
 	int i = open(FILE, O_RDONLY, 0);
 	i += 0;
 }
-
-
-//nie patrze na builtiny w przypadku poleceń wbudowanych
-//budowa lini (średniki)
-//jedna komenda
 
 
 int shl_parseline(char *i, line **l)

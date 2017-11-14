@@ -20,6 +20,8 @@ int find_end(const char *input, int i, int e)
 	return -1;
 }
 
+
+//problem z koncem pliku
 int shl_read(char *input)
 {
 	static char buffer[BUFFER_SIZE];
