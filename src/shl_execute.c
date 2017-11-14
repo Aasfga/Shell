@@ -2,6 +2,7 @@
 // Created by Dominik Grybos on 12.11.2017.
 //
 
+#include <stdlib.h>
 #include <unistd.h>
 #include <shl_io.h>
 #include <errno.h>
@@ -14,6 +15,7 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <stdarg.h>
+#include <printf.h>
 
 //int move_descriptor(int fd, int dest)
 //{
@@ -60,13 +62,13 @@ int set_redirs(redirection **redirs)
 		else if(IS_ROUT(redirs[i]->flags))
 		{
 			if(set_redir(1, redirs[i]->filename, O_TRUNC | O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR) < 0)
-				return -1;
+				return -i;
 
 		}
 		else
 		{
 			if(set_redir(1, redirs[i]->filename, O_APPEND | O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR) < 0)
-				return -1;
+				return -i;
 		}
 
 	}
@@ -78,7 +80,7 @@ int set_new_process(command *com)
 {
 //	write(1, com->argv[0], strlen(com->argv[0]));
 	int i = set_redirs(com->redirs);
-	if(i < 0);
+	if(i < 0)
 	{
 		exec_error(com->redirs[-i]->filename, errno);
 		exit(EXEC_FAILURE);
