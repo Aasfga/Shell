@@ -55,7 +55,7 @@ int set_redirs(redirection **redirs)
 		if(IS_RIN(redirs[i]->flags))
 		{
 			if(set_redir(0, redirs[i]->filename, O_RDONLY) < 0)
-				return -1;
+				return -i;
 		}
 		else if(IS_ROUT(redirs[i]->flags))
 		{
@@ -77,7 +77,13 @@ int set_redirs(redirection **redirs)
 int set_new_process(command *com)
 {
 //	write(1, com->argv[0], strlen(com->argv[0]));
-	set_redirs(com->redirs);
+	int i = set_redirs(com->redirs);
+	if(i < 0);
+	{
+		exec_error(com->redirs[-i]->filename, errno);
+		exit(EXEC_FAILURE);
+	}
+
 	execvp(com->argv[0], com->argv);
 	int err = errno;
 	exec_error(com ->argv[0], err);
