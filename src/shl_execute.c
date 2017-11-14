@@ -77,7 +77,7 @@ int set_redirs(redirection **redirs)
 int set_new_process(command *com)
 {
 //	write(1, com->argv[0], strlen(com->argv[0]));
-	//set_redirs(com->redirs);
+	set_redirs(com->redirs);
 	execvp(com->argv[0], com->argv);
 	int err = errno;
 	exec_error(com ->argv[0], err);
