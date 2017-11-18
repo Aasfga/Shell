@@ -51,13 +51,12 @@ int set_redirs(redirection **redirs)
 		}
 		else
 		{
-			errno = 128;
 			return -1;
 		}
 
 		int src = open(redirs[i]->filename, flag, S_IRUSR | S_IWUSR);
 		if(src < 0)
-			return -1;
+			return i + 1;
 
 		if(move_descriptor(src, dest) < 0)
 		{
@@ -69,8 +68,14 @@ int set_redirs(redirection **redirs)
 
 int set_new_process(command *com)
 {
-	if(set_redirs(com->redirs) < 0)
+	int status = set_redirs(com->redirs);
+	if(status < 0)
 		exit(EXEC_FAILURE);
+	else if(status > 0)
+	{
+		exec_error(com->redirs[status - 1]->filename, errno);
+		exit(EXEC_FAILURE);
+	}
 	execvp(com->argv[0], com->argv);
 	int err = errno;
 	exec_error(com ->argv[0], err);
