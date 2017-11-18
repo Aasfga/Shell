@@ -15,6 +15,7 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 //int move_descriptor(int fd, int dest)
 //{
@@ -40,8 +41,12 @@ int move_descriptor(int fd, int dest)
 int set_redir(int dest_fd, char *filename, int flags, ...)
 {
 	va_list list;
-	va_start(list, 1);
-	int fd = open(filename, flags, va_arg(list, int));
+	va_start(list, flags & O_CREAT);
+	int fd;
+	if(flags & O_CREAT)
+		fd = open(filename, flags, va_arg(list, int));
+	else
+		fd = open(filename, flags);
 	if(fd < 0)
 		return -1;
 	return move_descriptor(fd, dest_fd);
@@ -49,8 +54,6 @@ int set_redir(int dest_fd, char *filename, int flags, ...)
 
 int set_redirs(redirection **redirs)
 {
-	int fd;
-	int status;
 	for(int i = 0; redirs[i] != NULL; i++)
 	{
 		if(IS_RIN(redirs[i]->flags))
@@ -62,7 +65,6 @@ int set_redirs(redirection **redirs)
 		{
 			if(set_redir(1, redirs[i]->filename, O_TRUNC | O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR) < 0)
 				return -i;
-
 		}
 		else
 		{
@@ -77,7 +79,6 @@ int set_redirs(redirection **redirs)
 
 int set_new_process(command *com)
 {
-//	write(1, com->argv[0], strlen(com->argv[0]));
 	int i = set_redirs(com->redirs);
 	if(i < 0)
 	{
@@ -183,7 +184,7 @@ int shl_exec(line *line)
 		}
 		else
 		{
-			if(shl_exec_pipeline(p) < 0)
+			if(shl_exec_command(p[0]) < 0)
 				return -1;
 		}
 
