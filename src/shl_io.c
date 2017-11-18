@@ -60,7 +60,7 @@ int shl_read(char *input)
 		}
 		if(index - start > 0)
 		{
-			memcpy(input, buffer + start, end - start);
+			memcpy(input, buffer + start, index - start);
 			input[index - start] = '\n';
 			input[index - start + 1] = '\0';
 			start = index;

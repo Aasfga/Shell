@@ -17,75 +17,60 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-//int move_descriptor(int fd, int dest)
-//{
-//	if(fd == dest)
-//		return 0;
-//	if(close(dest) < 0)
-//		return -1;
-//	dup(fd);
-//	close(fd);
-//	return 0;
-//}
 
-int move_descriptor(int fd, int dest)
+
+int move_descriptor(int src, int dest)
 {
-	if(fd == dest)
+	if(src == dest)
 		return 0;
-	if(dup2(fd, dest))
+	if(dup2(src, dest) < 0)
 		return -1;
-	close(fd);
+	if(close(src) < 0)
+		return -1;
 	return 0;
-}
-
-int set_redir(int dest_fd, char *filename, int flags, ...)
-{
-	va_list list;
-	va_start(list, flags & O_CREAT);
-	int fd;
-	if(flags & O_CREAT)
-		fd = open(filename, flags, va_arg(list, int));
-	else
-		fd = open(filename, flags);
-	if(fd < 0)
-		return -1;
-	return move_descriptor(fd, dest_fd);
 }
 
 int set_redirs(redirection **redirs)
 {
 	for(int i = 0; redirs[i] != NULL; i++)
 	{
+		int flag = 0;
+		int dest = 1;
 		if(IS_RIN(redirs[i]->flags))
 		{
-			if(set_redir(0, redirs[i]->filename, O_RDONLY) < 0)
-				return -i;
+			flag = O_RDONLY;
+			dest = 0;
 		}
 		else if(IS_ROUT(redirs[i]->flags))
 		{
-			if(set_redir(1, redirs[i]->filename, O_TRUNC | O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR) < 0)
-				return -i;
+			flag = O_WRONLY | O_TRUNC | O_CREAT;
+		}
+		else if(IS_RAPPEND(redirs[i]->flags))
+		{
+			flag = O_WRONLY | O_APPEND | O_CREAT;
 		}
 		else
 		{
-			if(set_redir(1, redirs[i]->filename, O_APPEND | O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR) < 0)
-				return -i;
+			errno = 128;
+			return -1;
 		}
 
+		int src = open(redirs[i]->filename, flag, S_IRUSR | S_IWUSR);
+		if(src < 0)
+			return -1;
+
+		if(move_descriptor(src, dest) < 0)
+		{
+			return -1;
+		}
 	}
 	return 0;
 }
 
-
 int set_new_process(command *com)
 {
-	int i = set_redirs(com->redirs);
-	if(i < 0)
-	{
-		exec_error(com->redirs[-i]->filename, errno);
+	if(set_redirs(com->redirs) < 0)
 		exit(EXEC_FAILURE);
-	}
-
 	execvp(com->argv[0], com->argv);
 	int err = errno;
 	exec_error(com ->argv[0], err);
@@ -110,48 +95,6 @@ int shl_exec_command(command *com)
 	return err;
 }
 
-int shl_exec_pipeline(pipeline commands)
-{
-	int last = 0;
-	int fd[2];
-	int i;
-	for(i = 0; commands[i] != NULL; i++)
-	{
-		//zamykanie pipa jezeli nie stdin
-		if(commands[i + 1] == NULL)
-		{
-			fd[0] = -1;
-			fd[1] = 1;
-		}
-		else if(pipe(fd) < 0)
-			return -1;
-
-		if(!fork())
-		{
-			if(move_descriptor(last, 0) < 0)
-				exit(-1);
-			if(move_descriptor(fd[1], 1) < 0)
-				exit(-1);
-
-			if(fd[0] > 0)
-				close(fd[0]);
-
-			set_new_process(commands[i]);
-		}
-		if(last > 1)
-			close(last);
-		last = fd[0];
-		if(fd[1] > 1)
-			close(fd[1]);
-	}
-
-	while(i > 0)
-	{
-		wait(NULL);
-		i--;
-	}
-	return 0;
-}
 
 int is_builtin(command *com)
 {
