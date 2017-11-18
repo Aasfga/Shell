@@ -112,6 +112,46 @@ int is_builtin(command *com)
 	return -1;
 }
 
+
+int shl_exec_pipeline(pipeline commands)
+{
+	int last = 0;
+	int fd[2];
+	int i;
+	for(i = 0; commands[i] != NULL; i++)
+	{
+		if(commands[i+1] == NULL)
+		{
+			fd[0] = -1;
+			fd[1] = 1;
+		}
+		else if(pipe(fd) < 0)
+			return -1;
+
+		int pid = fork();
+		if(!pid)
+		{
+			if(move_descriptor(last, 0) < 0)
+				exit(EXEC_FAILURE);
+			if(move_descriptor(fd[1], 1) < 0)
+				exit(EXEC_FAILURE);
+			close(fd[0]);
+			set_new_process(commands[i]);
+			exit(EXEC_FAILURE);
+		}
+		if(last > 1)
+			close(last);
+		last = fd[0];
+		if(fd[1] > 1)
+			close(fd[1]);
+	}
+
+	while(i--)
+		wait(NULL);
+
+	return 0;
+}
+
 int shl_exec(line *line)
 {
 	pipeline p;
@@ -132,7 +172,7 @@ int shl_exec(line *line)
 		}
 		else
 		{
-			if(shl_exec_command(p[0]) < 0)
+			if(shl_exec_pipeline(p))
 				return -1;
 		}
 
