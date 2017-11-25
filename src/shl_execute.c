@@ -103,8 +103,11 @@ int shl_exec_command(command *com)
 }
 
 
-int is_builtin(command *com)
+int is_builtin(pipeline p)
 {
+	if(p[0]->argv[0] == NULL)
+		return -1;
+	command *com = p[0];
 	for(int i = 0; builtins_table[i].fun != NULL; i++)
 	{
 		if(strcmp(builtins_table[i].name, com->argv[0]) == 0)
@@ -115,7 +118,7 @@ int is_builtin(command *com)
 }
 
 
-int shl_exec_pipeline(pipeline commands)
+int shl_exec_pipeline(pipeline commands, int fg)
 {
 	int last = 0;
 	int fd[2];
@@ -141,7 +144,7 @@ int shl_exec_pipeline(pipeline commands)
 			set_new_process(commands[i]);
 			exit(EXEC_FAILURE);
 		}
-		if(add_fg(pid) < 0)
+		if(fg && add_fg(pid) < 0)
 			return -1;
 		if(last > 1)
 			close(last);
@@ -150,13 +153,14 @@ int shl_exec_pipeline(pipeline commands)
 			close(fd[1]);
 	}
 
-	while(fg_size() != 0)
+	while(fg && fg_size() != 0)
 	{
 		sigsuspend(&default_mask);
 	}
 
 	return 0;
 }
+
 
 int shl_exec(line *line)
 {
@@ -166,9 +170,7 @@ int shl_exec(line *line)
 	{
 		p = line->pipelines[i];
 
-		if(p[0]->argv[0] == NULL)
-			continue;
-		int b = is_builtin(p[0]);
+		int b = is_builtin(p);
 		if(b >= 0)
 		{
 			if(builtins_table[b].fun(p[0]->argv) != 0)
@@ -178,7 +180,7 @@ int shl_exec(line *line)
 		}
 		else
 		{
-			if(shl_exec_pipeline(p))
+			if(shl_exec_pipeline(p, line->flags != LINBACKGROUND))
 				return -1;
 		}
 

@@ -6,12 +6,31 @@
 #include <stdio.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <shl_io.h>
 
 #define FG_SIZE 400
-
-
+#define EXIT_SIZE 400
+int _bg_exits[EXIT_SIZE][2];
+int iter = 0;
 int fg_list[FG_SIZE] = {0};
 int _fg_size = 0;
+
+void add_status(int pid, int status)
+{
+	_bg_exits[iter][0] = pid;
+	_bg_exits[iter][1] = status;
+	iter = (iter + 1) % EXIT_SIZE;
+}
+
+
+void bg_exits()
+{
+	for(int i = 0; i < iter; i++)
+	{
+		print_status(_bg_exits[i][0], _bg_exits[i][1]);
+	}
+	iter = 0;
+}
 
 int add_fg(int pid)
 {
@@ -57,16 +76,17 @@ int fg_size()
 {
 	return _fg_size;
 }
+
 void child_handler(int sig)
 {
-	int pid = 1;
-	int status = -1;
+	int status;
+	int pid = waitpid(-1, &status, WNOHANG);
 	while(pid > 0)
 	{
 		if(is_fg(pid))
 			remove_fg(pid);
-//		else
-			//dodaj do zakończonych
+		else
+			add_status(pid, status);
 		pid = waitpid(-1, &status, WNOHANG);
 	}
 
@@ -76,6 +96,7 @@ void child_handler(int sig)
 void block_sigchld()
 {
 	sigset_t set;
+	sigemptyset(&set);
 	sigaddset(&set, SIGCHLD);
 	sigprocmask(SIG_BLOCK, &set, NULL);
 }
@@ -83,6 +104,7 @@ void block_sigchld()
 void unblock_sigchld()
 {
 	sigset_t set;
+	sigemptyset(&set);
 	sigaddset(&set, SIGCHLD);
 	sigprocmask(SIG_UNBLOCK, &set, NULL);
 }

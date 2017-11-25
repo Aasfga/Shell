@@ -60,9 +60,12 @@ int main(int argc, char *argv[])
 		}
 		else if(!input[0])
 			break;
+		else if(input[0] == '\n')
+			continue;
 
 		if(shl_parseline(input, &l) == -1)
 			continue;
+
 
 		if(shl_exec(l) < 0)
 		{

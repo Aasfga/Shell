@@ -11,6 +11,7 @@
 #define SYNTAX_ERROR 128
 
 
+void print_status(int pid, int status);
 
 void print_prompt();
 

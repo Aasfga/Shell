@@ -8,7 +8,11 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <shl_children.h>
+#include <sys/wait.h>
 #include "shl_io.h"
+
+#define DEBUG 1
 
 int find_end(const char *input, int i, int e)
 {
@@ -20,8 +24,20 @@ int find_end(const char *input, int i, int e)
 	return -1;
 }
 
+void print_status(int pid, int status)
+{
+	if(WIFEXITED(status))
+	{
+		status = WEXITSTATUS(status);
+		printf("Background process %i terminated. (exited with status %i)\n", pid, status);
+	}
+	else
+	{
+		status = WSTOPSIG(status);
+		printf("Background process %i terminated. (killed by signal %i)\n", pid, status);
+	}
+}
 
-//problem z koncem pliku
 int shl_read(char *input)
 {
 	static char buffer[BUFFER_SIZE];
@@ -32,6 +48,7 @@ int shl_read(char *input)
 	int eof = 0;
 
 
+	unblock_sigchld();
 	while(end == -1 && !eof)
 	{
 		ssize_t bytes = read(0, buffer + index, MAX_LINE_LENGTH);
@@ -93,7 +110,7 @@ int shl_read(char *input)
 		}
 
 	}
-
+	block_sigchld();
 	return 0;
 }
 
@@ -136,8 +153,9 @@ void print_prompt()
 {
 	struct stat b;
 	fstat(0, &b);
-	if(S_ISCHR(b.st_mode))
+	if(DEBUG || S_ISCHR(b.st_mode))
 	{
+		bg_exits();
 		write(1, PROMPT_STR, strlen(PROMPT_STR));
 		fflush(stdout);
 	}
