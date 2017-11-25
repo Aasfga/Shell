@@ -67,8 +67,10 @@ int set_redirs(redirection **redirs)
 	return 0;
 }
 
-int set_new_process(command *com)
+int set_new_process(command *com, int fg)
 {
+	if(!fg)
+		signal(SIGINT, SIG_IGN);
 	sigprocmask(SIG_SETMASK, &default_mask, NULL);
 	int status = set_redirs(com->redirs);
 	if(status < 0)
@@ -88,7 +90,7 @@ int shl_exec_command(command *com)
 {
 	if(!fork())
 	{
-		exit(set_new_process(com));
+//		exit(set_new_process(com));
 	}
 
 	int err = 0;
@@ -141,7 +143,7 @@ int shl_exec_pipeline(pipeline commands, int fg)
 			if(move_descriptor(fd[1], 1) < 0)
 				exit(EXEC_FAILURE);
 			close(fd[0]);
-			set_new_process(commands[i]);
+			set_new_process(commands[i], fg);
 			exit(EXEC_FAILURE);
 		}
 		if(fg && add_fg(pid) < 0)

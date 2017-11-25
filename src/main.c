@@ -35,6 +35,7 @@ int shl_parseline(char *i, line **l)
 void set_signals()
 {
 	sigprocmask(SIG_BLOCK, NULL, &default_mask);
+	signal(SIGINT, int_handler);
 	signal(SIGCHLD, child_handler);
 	block_sigchld();
 }
@@ -42,6 +43,7 @@ void set_signals()
 int main(int argc, char *argv[])
 {
 	set_signals();
+	setsid();
 	if(DEBUG)
 		swap_stdin();
 

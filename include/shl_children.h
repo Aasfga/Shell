@@ -9,6 +9,8 @@
 
 sigset_t default_mask;
 
+void int_handler(int sig);
+
 void bg_exits();
 
 void child_handler(int sig);

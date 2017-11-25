@@ -22,7 +22,6 @@ void add_status(int pid, int status)
 	iter = (iter + 1) % EXIT_SIZE;
 }
 
-
 void bg_exits()
 {
 	for(int i = 0; i < iter; i++)
@@ -91,6 +90,16 @@ void child_handler(int sig)
 	}
 
 	signal(SIGCHLD, child_handler);
+}
+
+void int_handler(int sig)
+{
+	static int sig_counter = 0;
+	sig_counter++;
+	if(sig_counter == 2)
+		sig_counter = 0;
+	else
+		killpg(0, SIGINT);
 }
 
 void block_sigchld()
