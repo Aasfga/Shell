@@ -12,7 +12,7 @@
 #include <sys/wait.h>
 #include "shl_io.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 int find_end(const char *input, int i, int e)
 {
