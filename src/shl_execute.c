@@ -16,7 +16,8 @@
 #include <sys/types.h>
 #include <stdarg.h>
 #include <stdio.h>
-
+#include <shl_children.h>
+#include <signal.h>
 
 
 int move_descriptor(int src, int dest)
@@ -68,6 +69,7 @@ int set_redirs(redirection **redirs)
 
 int set_new_process(command *com)
 {
+	sigprocmask(SIG_SETMASK, &default_mask, NULL);
 	int status = set_redirs(com->redirs);
 	if(status < 0)
 		exit(EXEC_FAILURE);
@@ -139,6 +141,8 @@ int shl_exec_pipeline(pipeline commands)
 			set_new_process(commands[i]);
 			exit(EXEC_FAILURE);
 		}
+		if(add_fg(pid) < 0)
+			return -1;
 		if(last > 1)
 			close(last);
 		last = fd[0];
@@ -146,8 +150,10 @@ int shl_exec_pipeline(pipeline commands)
 			close(fd[1]);
 	}
 
-	while(i--)
-		wait(NULL);
+	while(fg_size() != 0)
+	{
+		sigsuspend(&default_mask);
+	}
 
 	return 0;
 }

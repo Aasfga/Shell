@@ -3,9 +3,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <shl_children.h>
 #include "config.h"
 #include "shl_io.h"
-
+#include <signal.h>
 
 
 
@@ -31,15 +32,22 @@ int shl_parseline(char *i, line **l)
 	return 0;
 }
 
+void set_signals()
+{
+	sigprocmask(SIG_BLOCK, NULL, &default_mask);
+	signal(SIGCHLD, child_handler);
+	block_sigchld();
+}
+
 int main(int argc, char *argv[])
 {
+	set_signals();
 	if(DEBUG)
 		swap_stdin();
 
 	char input[MAX_LINE_LENGTH + 1];
 	line *l;
 	command *c;
-	int status;
 
 	while(1)
 	{
