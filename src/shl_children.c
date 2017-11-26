@@ -97,6 +97,17 @@ void sigchld_handler(int sig)
 	signal(SIGCHLD, sigchld_handler);
 }
 
+void sigint_handler(int sig)
+{
+	for(int i = 0; i < SIZE; i++)
+	{
+		if(_fg_list[i] != 0)
+		{
+			kill(_fg_list[i], SIGKILL);
+		}
+	}
+}
+
 void print_exits()
 {
 	for(int i = 0; i  < iter; i++)

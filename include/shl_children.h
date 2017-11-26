@@ -19,6 +19,8 @@ int fg_size();
 
 void sigchld_handler(int sig);
 
+void sigint_handler(int sig);
+
 void print_exits();
 
 void unblock_sigchld();
