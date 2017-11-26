@@ -13,7 +13,7 @@
 
 //ma robić pipeline (jest więcej komand niz jedna)
 
-#define FILE "/Users/Dominik/Documents/Programowanie/C/Studia/SO/Shell/0.in"
+#define FILE "/Users/Dominik/Documents/Programowanie/C/Studia/SO/Shell/suites/1/input/4.in"
 #define DEBUG 0
 
 void swap_stdin()

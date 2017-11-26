@@ -92,6 +92,9 @@ void sigchld_handler(int sig)
 			add_exit(pid, status);
 		pid = waitpid(-1, &status, WNOHANG);
 	}
+
+
+	signal(SIGCHLD, sigchld_handler);
 }
 
 void print_exits()
@@ -106,14 +109,16 @@ void print_exits()
 
 void unblock_sigchld()
 {
-	sigset_t old_mask;
-	sigprocmask(SIG_SETMASK, &_mask, &old_mask);
-	_mask = old_mask;
+	sigset_t mask;
+	sigemptyset(&mask);
+	sigaddset(&mask, SIGCHLD);
+	sigprocmask(SIG_UNBLOCK, &mask, NULL);
 }
 
 void block_sigchld()
 {
-	sigset_t old_mask;
-	sigprocmask(SIG_SETMASK, &_mask, &old_mask);
-	_mask = old_mask;
+	sigset_t mask;
+	sigemptyset(&mask);
+	sigaddset(&mask, SIGCHLD);
+	sigprocmask(SIG_BLOCK, &mask, NULL);
 }
