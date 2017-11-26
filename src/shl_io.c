@@ -8,6 +8,8 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
+#include <shl_children.h>
 #include "shl_io.h"
 
 int find_end(const char *input, int i, int e)
@@ -24,6 +26,7 @@ int find_end(const char *input, int i, int e)
 //problem z koncem pliku
 int shl_read(char *input)
 {
+	unblock_sigchld();
 	static char buffer[BUFFER_SIZE];
 	static int index = 0;
 	static int start = 0;
@@ -94,6 +97,7 @@ int shl_read(char *input)
 
 	}
 
+	block_sigchld();
 	return 0;
 }
 
@@ -138,7 +142,22 @@ void print_prompt()
 	fstat(0, &b);
 	if(S_ISCHR(b.st_mode))
 	{
+		print_exits();
 		write(1, PROMPT_STR, strlen(PROMPT_STR));
 		fflush(stdout);
+	}
+}
+
+void print_status(int pid, int status)
+{
+	if(WIFEXITED(status))
+	{
+		status = WEXITSTATUS(status);
+		printf("Background process %i terminated. (exited with status %i)\n", pid, status);
+	}
+	else
+	{
+		status = WTERMSIG(status);
+		printf("Background process %i terminated. (killed by signal %i)\n", pid, status);
 	}
 }

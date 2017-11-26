@@ -22,4 +22,6 @@ void print_error(int status);
 
 void builtin_error(char *name);
 
+void print_status(int pid, int status);
+
 #endif //SHELL_READER_H

@@ -16,7 +16,8 @@
 #include <sys/types.h>
 #include <stdarg.h>
 #include <stdio.h>
-
+#include <shl_children.h>
+#include <signal.h>
 
 
 int move_descriptor(int src, int dest)
@@ -113,7 +114,7 @@ int is_builtin(command *com)
 }
 
 
-int shl_exec_pipeline(pipeline commands)
+int shl_exec_pipeline(pipeline commands, int bg)
 {
 	int last = 0;
 	int fd[2];
@@ -139,6 +140,8 @@ int shl_exec_pipeline(pipeline commands)
 			set_new_process(commands[i]);
 			exit(EXEC_FAILURE);
 		}
+		if(!bg)
+			add_fg(pid);
 		if(last > 1)
 			close(last);
 		last = fd[0];
@@ -146,8 +149,11 @@ int shl_exec_pipeline(pipeline commands)
 			close(fd[1]);
 	}
 
-	while(i--)
-		wait(NULL);
+	sigset_t mask = give_mask();
+	while(!bg && fg_size() != 0)
+	{
+		sigsuspend(&mask);
+	}
 
 	return 0;
 }
@@ -172,7 +178,7 @@ int shl_exec(line *line)
 		}
 		else
 		{
-			if(shl_exec_pipeline(p))
+			if(shl_exec_pipeline(p, line->flags == LINBACKGROUND))
 				return -1;
 		}
 
