@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.8.6)
 project(Shell)
 
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Tests)
 set(CMAKE_C_FLAGS "-std=gnu99 ${CMAKE_C_FLAGS}")
 include_directories(include)
 file(GLOB SOURCE_FILES src/*.c)
