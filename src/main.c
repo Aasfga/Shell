@@ -37,7 +37,7 @@ void set_signals()
 {
 	set_new_mask();
 	signal(SIGCHLD, sigchld_handler);
-	signal(SIGINT, sigint_handler);
+	signal(SIGINT, SIG_IGN);
 }
 
 int main(int argc, char *argv[])

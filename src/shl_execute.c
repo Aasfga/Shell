@@ -132,6 +132,8 @@ int shl_exec_pipeline(pipeline commands, int bg)
 		int pid = fork();
 		if(!pid)
 		{
+			if(bg)
+				setsid();
 			if(move_descriptor(last, 0) < 0)
 				exit(EXEC_FAILURE);
 			if(move_descriptor(fd[1], 1) < 0)
