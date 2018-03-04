@@ -1,5 +1,5 @@
 # Shell
 
-Shell written in C
+Simple shell written in C.
 
 ![Shell](shell.png)
